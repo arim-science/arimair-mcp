@@ -6,6 +6,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { loadConfig } from "./config.js";
 import { ArimApiClient } from "./api-client.js";
 import { registerAuthTools } from "./tools/auth.js";
+import { registerSiteTools } from "./tools/site.js";
 import { registerDeviceTools } from "./tools/device.js";
 import { registerDataTools } from "./tools/data.js";
 import { registerStatisticsTools } from "./tools/statistics.js";
@@ -24,6 +25,7 @@ async function main(): Promise<void> {
   });
 
   registerAuthTools(server, apiClient);
+  registerSiteTools(server, apiClient);
   registerDeviceTools(server, apiClient);
   registerDataTools(server, apiClient);
   registerStatisticsTools(server, apiClient);

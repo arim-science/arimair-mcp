@@ -45,6 +45,18 @@ export interface DeviceInfo {
   [key: string]: unknown;
 }
 
+/**
+ * 사이트 (com.arimsc.model.Admin).
+ * 서버 내부에서는 모니터링 대상 관리자 계정(monitorId)이지만, 화면과 도구에서는 "사이트"로 부른다.
+ * 표시명은 company 다 (화면의 사이트 선택 콤보와 동일).
+ */
+export interface AdminSite {
+  adminId: string;
+  name?: string;
+  company?: string;
+  [key: string]: unknown;
+}
+
 /** 센서 메타 (com.arimsc.model.Sensor) — digit 은 "F1","F2" 형식 */
 export interface Sensor {
   id: string;

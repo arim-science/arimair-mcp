@@ -2,6 +2,7 @@
 
 import type { AppConfig } from "./config.js";
 import type {
+  AdminSite,
   ApiResponse,
   AuthResult,
   CorrectionFactor,
@@ -20,6 +21,8 @@ export class ArimApiClient {
   private readonly cookies: Map<string, string> = new Map();
   private currentUserId?: string;
   private currentUserType?: string;
+  /** 이 세션에서 마지막으로 고른 사이트 — /account/me 가 없는 서버에서 현재 사이트를 알기 위한 폴백 */
+  private selectedSiteId?: string;
   /** 세션 만료로 재로그인하는 중인지 — 재귀 재시도를 막는다 */
   private reloggingIn = false;
 
@@ -67,6 +70,7 @@ export class ArimApiClient {
 
     this.currentUserId = userId;
     this.currentUserType = userType;
+    this.selectedSiteId = undefined;
 
     return { userId, userType, message: body.message ?? "로그인에 성공했습니다." };
   }
@@ -78,11 +82,48 @@ export class ArimApiClient {
       this.cookies.clear();
       this.currentUserId = undefined;
       this.currentUserType = undefined;
+      this.selectedSiteId = undefined;
     }
   }
 
   async me(): Promise<MeResult> {
     return this.get<MeResult>("/account/me");
+  }
+
+  // ──────────────────────── Site (monitorId) ────────────────────────
+
+  /**
+   * 선택 가능한 사이트 목록.
+   * 화면(layout.jsp)과 같은 규칙으로, 일반사용자는 승인받은 공급자만, 관리자는 전체 관리자 목록을 본다.
+   */
+  async getSites(): Promise<AdminSite[]> {
+    const userType = this.currentUserType ?? this.config.defaultUserType;
+    const path = userType === "user" ? "/datarequest/providerlist" : "/admin/list";
+    const list = await this.get<AdminSite[]>(path);
+
+    // 'admin' 은 사이트가 아니라 전체 관리자 계정이라 화면에서도 목록에서 뺀다
+    return (list ?? []).filter((s) => s.adminId !== "admin");
+  }
+
+  /** 세션의 monitorId 를 바꾼다. 이 엔드포인트는 JSON 이 아니라 "OK" 문자열을 돌려준다. */
+  async selectSite(adminId: string): Promise<void> {
+    const text = await this.getText(`/site/update/${encodeURIComponent(adminId)}`);
+
+    if (text.trim() !== "OK") {
+      throw new Error(`사이트 변경에 실패했습니다: ${text.trim() || "빈 응답"}`);
+    }
+
+    this.selectedSiteId = adminId;
+  }
+
+  /** 현재 사이트 id. /account/me 가 없는 서버에서는 이 세션에서 고른 값으로 답한다. */
+  async getCurrentSiteId(): Promise<string | undefined> {
+    try {
+      const me = await this.me();
+      return me?.monitorId ?? this.selectedSiteId;
+    } catch {
+      return this.selectedSiteId;
+    }
   }
 
   // ──────────────────────── Device ────────────────────────

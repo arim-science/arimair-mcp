@@ -20,7 +20,8 @@
 
 ## 3. 도구 구현 (조회 전용)
 
-- [x] `tools/auth.ts` — arim_login, arim_whoami
+- [x] `tools/auth.ts` — arim_login, arim_whoami, arim_logout
+- [x] `tools/site.ts` — site_list, site_select (실제 사이트 51건으로 매칭 검증)
 - [x] `tools/device.ts` — device_list/get/realtime/realtime_correction/nearby_stations
 - [x] `tools/data.ts` — data_search, data_raw_search, data_recent
 - [x] `tools/statistics.ts` — stat_daily_avg, stat_collection_rate, stat_weather, stat_weather_stations, sensor_list

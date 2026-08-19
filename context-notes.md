@@ -69,3 +69,26 @@ Windows 기본 셸인 Windows PowerShell 5.1은 BOM 없는 UTF-8 `.ps1`을 ANSI(
 `claude mcp remove arim`은 등록이 없을 때 0이 아닌 코드로 끝난다. PowerShell 7.3+에서
 `$PSNativeCommandUseErrorActionPreference`가 켜져 있으면 이것만으로 스크립트가 중단되므로
 스크립트 앞부분에서 (변수가 있을 때만) 꺼둔다.
+
+### 사이트(=monitorId) 전환은 서버 수정이 필요 없었다
+세션의 `monitorId`를 바꾸는 엔드포인트가 이미 있다 — `GET /site/update/{adminId}`.
+목록은 웹 화면(`layout.jsp`)과 같은 규칙으로 가져온다.
+관리자(`R0001`)는 `GET /admin/list`, 일반사용자는 `GET /datarequest/providerlist`.
+둘 다 `Admin` 타입이고 화면은 `company`를 표시명으로 쓰며 `adminId == "admin"`은 목록에서 뺀다.
+
+주의할 점 두 가지.
+- `/site/update/{id}`는 JSON이 아니라 `"OK"` 문자열을 돌려준다. `JSON.parse("OK")`는 예외이므로
+  이 호출만 `getText`로 처리한다.
+- 매퍼가 `<if test="ownerId != 'admin'">`로 소유자 필터를 거는 구조라, `monitorId`가 `"admin"`이면
+  필터가 통째로 해제된다. 화면도 `monitorId`가 비었거나 `"admin"`이면 첫 사이트로 자동 전환한다.
+
+### 사이트 이름 매칭은 부분 문자열로는 부족하다
+실제 등록명이 `[환경보건센터] 울산 울산대` 같은 형태라, 사용자가 말하는 "울산 환경보건센터"는
+연속 부분 문자열로 잡히지 않는다. 그래서 검색어를 낱말로 쪼개 **모든 낱말이 들어 있는지**로 본다.
+검색 대상은 `company + name + adminId` 를 합친 문자열이다 — 같은 사이트라도 둘이 크게 다르다
+(`bisco`: company `_부산시설공단 [혁신임차종료]`, name `부산시설공단_지하도상가`).
+
+정확 일치를 부분 일치보다 먼저 보는 이유는 "도로교통연구원" 때문이다.
+`arimsc_ex`(company 가 정확히 "도로교통연구원")와 `ex_monitoring`("한국도로공사 도로교통연구원")이
+둘 다 걸리는데, 정확 일치 단계에서 전자로 좁혀진다.
+후보가 여럿이면 임의로 고르지 않고 후보 목록을 오류로 돌려준다 ("환경보건센터" → 9곳).
