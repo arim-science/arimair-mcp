@@ -11,7 +11,7 @@
 ### macOS / Linux
 
 ```bash
-cd /Users/amdmania/Project/arimair-mcp
+cd /Users/<사용자>/Project/arimair-mcp
 npm install
 npm run build
 ./setup-arim-mcp.sh     # Claude Code + Claude Desktop 자동 등록
@@ -57,7 +57,7 @@ claude mcp add arim -s user -t stdio \
   -e ARIM_API_BASE_URL=https://monitor.arimair.com \
   -e ARIM_MCP_USER=<아이디> \
   -e ARIM_MCP_PASS=<비밀번호> \
-  -- node /Users/amdmania/Project/arimair-mcp/build/index.js
+  -- node /Users/<사용자>/Project/arimair-mcp/build/index.js
 ```
 
 ```powershell
