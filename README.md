@@ -1,4 +1,4 @@
-# ARIM MCP 서버
+# ARIMAIR MCP 서버
 
 아림에어 모니터링 시스템의 측정 데이터·통계·보정·리포트를 Claude에서 직접 조회하는 MCP(stdio) 서버.
 
